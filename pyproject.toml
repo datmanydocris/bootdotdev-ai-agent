@@ -5,6 +5,7 @@ description = "Basic AI agent"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "lorem-text>=3.0",
     "openai==2.44.0",
     "python-dotenv==1.1.0",
 ]

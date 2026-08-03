@@ -1,17 +1,24 @@
 from functions.get_files_info import get_files_info
 
 def main():
-    # Should succeed - target within working directory
+    # Should succeed
+    print("Result for current directory:")
     print(get_files_info("calculator", "."))
+    print()
+
+    # Should succeed
+    print("Result for 'pkg' directory:")
+    print(get_files_info("calculator", "pkg"))
+    print()
 
     # Should fail - target outside of working directory
+    print("Result for '/bin' directory:")
     print(get_files_info("calculator", "/bin"))
-
-    # Should fail - tries to go up a level outside of working directory
-    print(get_files_info("calculator", "../"))
+    print()
 
     # Should fail – target not a directory
-    print(get_files_info("calculator", "main.py"))
+    print("Result for '../' directory:")
+    print(get_files_info("calculator", "../"))
 
 if __name__ == "__main__":
     main()

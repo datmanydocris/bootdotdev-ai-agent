@@ -28,33 +28,50 @@ def main():
         {"role": "user", "content": args.user_prompt},
     ]
 
-    response = client.chat.completions.create(
-        model="openrouter/free",
-        messages=messages,
-        temperature=0,
-        tools=available_functions
-    )
+    for iteration in range(20):
+        response = client.chat.completions.create(
+            model="openrouter/free",
+            messages=messages,
+            temperature=0,
+            tools=available_functions,
+        )
 
-    # Check that the usage data exists
-    if response.usage is None:
-        raise RuntimeError("API response did not include usage information")
+        # Check that the usage data exists
+        if response.usage is None:
+            raise RuntimeError("API response did not include usage information")
 
-    # Retrieve the message
-    message = response.choices[0].message
+        # Retrieve the message
+        message = response.choices[0].message
 
-    # Check if the message has tool calls
-    if message.tool_calls:
-        for tool_call in message.tool_calls:
-            result_message = call_function(tool_call, verbose=args.verbose)
+        # Add assistant message to history
+        messages.append(message)
 
-            if not result_message.get("content"):
-                raise Exception("Empty content in tool response")
+        # Check if the message has tool calls
+        if message.tool_calls:
+            for tool_call in message.tool_calls:
+                result_message = call_function(tool_call, verbose=args.verbose)
 
-            if args.verbose:
-                print(f"-> {result_message['content']}")
+                if not result_message.get("content"):
+                    raise Exception("Empty content in tool response")
+
+                if args.verbose:
+                    print(f"-> {result_message['content']}")
+
+                # Add tool result to history
+                messages.append(result_message)
+
+            # Go back and ask the model again
+            continue
+
+        else:
+            # Final answer, print
+            print("Final response:")
+            print(message.content)
+            break
     else:
-        # Normal text reply, handle as such
-        print(message.content)
+        # Only runs if we reach max iterations
+        print("Error: Maximum iterations (20) reached without a final response.")
+        exit(1)
 
     # Print information only if --verbose was used
     if args.verbose:
